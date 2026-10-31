@@ -6,7 +6,7 @@ Design rules and working methods stay inside the selected file.
 
 ## Run
 
-Requires Node.js 22 or later and the Lunagraph desktop app, signed in.
+Requires Node.js 22.13 or later and the Lunagraph desktop app, signed in.
 
 ```sh
 git clone https://github.com/lunagraph/agent-setup.git
@@ -14,8 +14,9 @@ cd agent-setup
 node bin/lunagraph-dna.mjs
 ```
 
-The wizard lists accessible files, asks which file and agents to use, then
-confirms installation. Mark the intended canvases, documents or elements as
+The wizard lists accessible files, asks which file to use, then shows agent
+checkboxes. All supported agents are selected by default: press Enter for all,
+Space to toggle an agent, or a to toggle all. Confirm to install. Mark the intended canvases, documents or elements as
 DNA in Lunagraph first. A page name containing DNA does not create a mark.
 The native DNA feature must be available in the running app and database.
 
@@ -60,6 +61,7 @@ Cloud authentication, CI review-bot setup and npm publication are not included.
 ## Development
 
 ```sh
+npm ci
 npm test
 npm pack --dry-run
 ```

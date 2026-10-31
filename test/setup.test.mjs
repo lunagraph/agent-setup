@@ -32,8 +32,8 @@ async function fixture(t, noMarks = false) {
 
 test('wizard selects native file and installs user-level MCP and hooks without repo files', async t => {
   const f = await fixture(t);
-  const answers = ['2', 'claude,codex,cursor', 'y'];
-  const paths = await setup({ home: f.home, url: f.url, ask: async () => answers.shift() });
+  const answers = ['2', 'y'];
+  const paths = await setup({ home: f.home, url: f.url, ask: async () => answers.shift(), chooseAgents: async () => ['claude', 'codex', 'cursor'] });
   assert.equal(paths.length, 9);
   assert.ok(f.calls.some(call => call.params?.name === 'project_pick' && call.params.arguments.project_id === 'file-b'));
   assert.ok(f.calls.some(call => call.params?.name === 'mark_list'));
@@ -65,8 +65,8 @@ test('missing marks and cancelled setup do not write configuration', async t => 
   const f = await fixture(t, true);
   await assert.rejects(installGlobal(f), /No items are marked/);
   assert.deepEqual(await readdir(f.home), []);
-  const answers = ['1', 'claude', 'n'];
-  assert.deepEqual(await setup({ home: f.home, url: f.url, ask: async () => answers.shift() }), []);
+  const answers = ['1', 'n'];
+  assert.deepEqual(await setup({ home: f.home, url: f.url, ask: async () => answers.shift(), chooseAgents: async () => ['claude'] }), []);
   assert.deepEqual(await readdir(f.home), []);
 });
 

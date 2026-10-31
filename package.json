@@ -1,6 +1,6 @@
 {
   "name": "@lunagraph/dna",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "Connect coding agents to the DNA in a Lunagraph file",
   "bin": {
@@ -12,7 +12,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs"
@@ -25,5 +25,11 @@
   "bugs": {
     "url": "https://github.com/lunagraph/agent-setup/issues"
   },
-  "homepage": "https://github.com/lunagraph/agent-setup#readme"
+  "homepage": "https://github.com/lunagraph/agent-setup#readme",
+  "dependencies": {
+    "@inquirer/checkbox": "^5.2.8"
+  },
+  "devDependencies": {
+    "@inquirer/testing": "^3.3.16"
+  }
 }

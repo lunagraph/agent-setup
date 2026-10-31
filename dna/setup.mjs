@@ -3,11 +3,22 @@ import { homedir } from 'node:os';
 import { dirname, join, isAbsolute } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
+import checkbox from '@inquirer/checkbox';
 import { connect, context } from './runtime.mjs';
 
 const MARKER = '# lunagraph-dna:begin';
 const END = '# lunagraph-dna:end';
 const shell = value => "'" + value.replaceAll("'", "'\\''") + "'";
+export const AGENT_PROMPT = {
+  message: 'Which agents should use this DNA?',
+  choices: [
+    { name: 'Claude Code', value: 'claude', checked: true },
+    { name: 'Codex', value: 'codex', checked: true },
+    { name: 'Cursor', value: 'cursor', checked: true },
+  ],
+  required: true,
+  shortcuts: { all: 'a', invert: null },
+};
 export async function listProjects(url) {
   const client = await connect({ url });
   const result = await client.call('project_list', { scope: 'all' });
@@ -104,8 +115,11 @@ export async function setup(options = {}) {
   const url = options.url ?? 'http://127.0.0.1:21209/mcp';
   const projects = await listProjects(url);
   if (!projects.length) throw new Error('No Lunagraph files found. Create or open a file in Lunagraph first.');
-  const terminal = options.ask ? null : createInterface({ input: stdin, output: stdout });
-  const ask = options.ask ?? (question => terminal.question(question));
+  let terminal;
+  const ask = options.ask ?? (question => {
+    terminal ??= createInterface({ input: stdin, output: stdout });
+    return terminal.question(question);
+  });
   try {
     let project = projects.find(value => value.id === options.projectId);
     if (options.projectId && !project) throw new Error('Selected file is not accessible');
@@ -116,7 +130,12 @@ export async function setup(options = {}) {
       project = projects[Number(choice.trim()) - 1];
       if (!project) throw new Error('Invalid file number');
     }
-    const agents = options.agents ?? (await ask('Agents [claude,codex,cursor]: ') || 'claude,codex,cursor').split(',').map(value => value.trim());
+    let agents = options.agents;
+    if (!agents) {
+      terminal?.close();
+      terminal = undefined;
+      agents = await (options.chooseAgents ?? (() => checkbox(AGENT_PROMPT)))();
+    }
     stdout.write(`Install user-level MCP and hooks for ${project.name}. This becomes the selected DNA file for these agents; app repos are not modified.\n`);
     if (!options.yes && (await ask('Install? [y/N]: ')).trim().toLowerCase() !== 'y') return [];
     return await installGlobal({ ...options, url, project, agents });
