@@ -1,6 +1,6 @@
 {
   "name": "@lunagraph/dna",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Connect coding agents to the DNA in a Lunagraph file",
   "bin": {

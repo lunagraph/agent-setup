@@ -56,8 +56,6 @@ reported instead of being replaced with generic design defaults.
 
 The local HTTP connection must accept requests without interactive OAuth.
 Cloud authentication, CI review-bot setup and npm publication are not included.
-The legacy explicit `install --repo ... --url ...` mode remains available for
-repo-local installation; the default wizard uses user-level configuration.
 
 ## Development
 

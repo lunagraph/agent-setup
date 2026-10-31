@@ -15,7 +15,7 @@ for await (const line of lines) {
     const client = await pending;
     let result;
     if (request.method === 'initialize') {
-      result = { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'lunagraph-dna', version: '0.2.0' }, instructions: `${POLICY}\nThis connection is already pinned to ${config.projectName ?? config.projectId}. Start with mark_list. Do not switch projects.` };
+      result = { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'lunagraph-dna', version: '0.2.1' }, instructions: `${POLICY}\nThis connection is already pinned to ${config.projectName ?? config.projectId}. Start with mark_list. Do not switch projects.` };
     } else if (request.method === 'tools/call' && ['project_pick', 'project_open', 'project_create'].includes(request.params?.name)) {
       throw new Error('Rerun Lunagraph setup to change the selected file.');
     } else result = await client.rpc(request.method, request.params);

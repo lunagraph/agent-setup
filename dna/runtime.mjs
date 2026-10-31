@@ -41,7 +41,7 @@ export async function connect(config) {
     if (message.error) throw new Error(message.error.message || 'MCP request failed');
     return message.result;
   }
-  await rpc('initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'lunagraph-dna', version: '0.1.0' } });
+  await rpc('initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'lunagraph-dna', version: '0.2.1' } });
   await rpc('notifications/initialized', {}, true);
   const call = (name, args = {}) => rpc('tools/call', { name, arguments: args });
   if (config.projectId) {
@@ -54,17 +54,17 @@ export async function connect(config) {
 
 export async function readDna(config) {
   const client = await connect(config);
-  const result = config.root ? await client.call('project_read', { file_path: config.root }) : await client.call('mark_list');
-  if (result?.isError) throw new Error('DNA root could not be read');
+  const result = await client.call('mark_list');
+  if (result?.isError) throw new Error('DNA marks could not be read');
   const text = result?.content?.filter(item => item.type === 'text').map(item => item.text).join('\n');
-  if (!text?.trim() || /^(?:file not found|not found|error:|no file|couldn't|could not|failed to)/i.test(text.trim())) throw new Error('DNA root is missing or empty');
-  if (!config.root && /Nothing is marked as DNA|No DNA/i.test(text)) throw new Error('No items are marked as DNA in this Lunagraph file');
+  if (!text?.trim() || /^(?:file not found|not found|error:|no file|couldn't|could not|failed to)/i.test(text.trim())) throw new Error('DNA marks are unavailable');
+  if (/Nothing is marked as DNA|No DNA/i.test(text)) throw new Error('No items are marked as DNA in this Lunagraph file');
   return text;
 }
 
 export async function context(config) {
   const dna = await readDna(config);
-  return `${POLICY}\n\nSelected file: ${config.projectName ?? config.projectId ?? 'configured file'}. The lunagraph-dna MCP connection is pinned to it.\n${config.root ? 'Read-only DNA entry point: ' + config.root : 'Read these native DNA marks with project_read or canvas_read AND take_screenshot. Follow their referenced skills.'}\n\n--- DNA ---\n${dna}`;
+  return `${POLICY}\n\nSelected file: ${config.projectName ?? config.projectId ?? 'configured file'}. The lunagraph-dna MCP connection is pinned to it.\nRead these native DNA marks with project_read or canvas_read AND take_screenshot. Follow their referenced skills.\n\n--- DNA ---\n${dna}`;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

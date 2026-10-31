@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { mkdtemp, rm, readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile, mkdir, readdir, symlink } from 'node:fs/promises';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { join } from 'node:path';
@@ -99,4 +99,21 @@ test('installed MCP bridge binds the chosen file before serving tools and blocks
   assert.match(replies[0].result.instructions, /Second app/);
   assert.equal(replies[1].result.tools[0].name, 'mark_list');
   assert.match(replies[2].error.message, /Rerun/);
+});
+
+test('invalid existing config fails before modifying other files', async t => {
+  const f = await fixture(t);
+  await mkdir(join(f.home, '.cursor'));
+  await writeFile(join(f.home, '.cursor/mcp.json'), 'invalid');
+  await assert.rejects(installGlobal(f));
+  assert.deepEqual(await readdir(f.home), ['.cursor']);
+});
+
+test('symlinked user configuration is not overwritten', async t => {
+  const f = await fixture(t);
+  const target = join(f.home, 'original.json');
+  await writeFile(target, '{}');
+  await symlink(target, join(f.home, '.claude.json'));
+  await assert.rejects(installGlobal(f), /symlink/);
+  assert.equal(await readFile(target, 'utf8'), '{}');
 });
